@@ -1,17 +1,20 @@
 from django.urls import path
-from .views import (
-    GiftListCreateView, GiftDetailView,
-    WishlistDetailView, AnotherUserWishlistDetailView,
-    GiftCopyListCreateView, GiftCopyDetailView,
-    home
-)
+from .views import (GiftListCreateView, GiftDetailView, 
+                    user_gift_list, other_user_gift_list, 
+                    main_menu, edit_gift, view_gift, home,
+                    delete_selected_gifts, create_gift,
+                    enter_user_id)
 
 urlpatterns = [
     path('gifts/', GiftListCreateView.as_view(), name='gift-list-create'),
     path('gifts/<int:pk>/', GiftDetailView.as_view(), name='gift-detail'),
-    path('gift-copies/', GiftCopyListCreateView.as_view(), name='gift-copy-list-create'),
-    path('gift-copies/<int:pk>/', GiftCopyDetailView.as_view(), name='gift-copy-detail'),
-    path('wishlist/<int:pk>', WishlistDetailView.as_view(), name='wishlist-detail'),
-    path('another-wishlist/<int:user_id>/', AnotherUserWishlistDetailView.as_view(), name='another-user-wishlist-detail'),
+    path('user-gift-list/', user_gift_list, name='user-gift-list'),
+    path('edit-gift/<int:pk>/', edit_gift, name='edit-gift'),
+    path('main-menu/', main_menu, name='main-menu'),
+    path('enter-user-id/', enter_user_id, name='enter-user-id'),
+    path('other-user-gift-list/<int:user_id>/', other_user_gift_list, name='other-user-gift-list'),
+    path('view-gift/<int:pk>/', view_gift, name='view-gift'),
     path('home/', home, name='home'),
-]
+    path('delete-selected-gifts/', delete_selected_gifts, name='delete-selected-gifts'),
+    path('create-gift/', create_gift, name='create-gift'),
+]   

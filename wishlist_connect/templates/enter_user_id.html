@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Enter User ID</h1>
+    <form method="post" action="{% url 'enter-user-id' %}">
+        {% csrf_token %}
+        <label for="user_id">User ID:</label>
+        <input type="number" name="user_id" required>
+        <br>
+        <button type="submit">View User's Gift List</button>
+    </form>
+{% endblock %}

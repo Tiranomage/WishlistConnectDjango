@@ -7,13 +7,7 @@ class Gift(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    
-class CopyOfGift(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    original_gift = models.ForeignKey(Gift, on_delete=models.CASCADE)
 
 class Wishlist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

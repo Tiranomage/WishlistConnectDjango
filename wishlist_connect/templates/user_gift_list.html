@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Your Gift List</h1>
+    <form method="post" action="{% url 'delete-selected-gifts' %}">
+        {% csrf_token %}
+        <br>
+        <button type="submit">Delete Selected Gifts</button>
+    </form>
+
+    <a href="{% url 'create-gift' %}">Create a New Gift</a>
+
+    {% for gift in gifts %}
+        <div>
+            <p>Name: {{ gift.title }}</p>
+            <p>Description: {{ gift.description }}</p>
+            <p>Price: {{ gift.price }}</p>
+            <input type="checkbox" name="selected_gifts" value="{{ gift.pk }}">
+            <!-- Add other gift information as needed -->
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}

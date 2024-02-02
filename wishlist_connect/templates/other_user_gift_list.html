@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Gifts from User {{ other_user.username }}</h1>
+    {% for gift in gifts %}
+        <div>
+            <p>Name: {{ gift.title }}</p>
+            <p>Description: {{ gift.description }}</p>
+            <p>Price: {{ gift.price }}</p>
+            <!-- Add other gift information as needed -->
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}

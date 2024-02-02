@@ -5,7 +5,9 @@ from .serializers import GiftSerializer
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden, Http404
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
@@ -21,6 +23,18 @@ class GiftDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Gift.objects.all()
     serializer_class = GiftSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('main-menu')
+    else:
+        form = UserCreationForm()
+
+    return render(request, 'register.html', {'form': form})
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
@@ -48,18 +62,17 @@ def user_gift_list(request):
 
 @login_required
 def edit_gift(request, pk):
-    gift = get_object_or_404(Gift, pk=pk)
-    
-    # Ensure the user can only edit their own gifts
-    if gift.user != request.user:
-        return HttpResponseForbidden("You don't have permission to edit this gift.")
-    
+    gift = get_object_or_404(Gift, pk=pk, user=request.user)
+
     if request.method == 'POST':
-        # Handle form submission and update the gift
-        # ...
-        return redirect('user-gift-list')
-    
-    return render(request, 'edit_gift.html', {'gift': gift})
+        form = GiftForm(request.POST, instance=gift)
+        if form.is_valid():
+            form.save()
+            return redirect('user-gift-list')
+    else:
+        form = GiftForm(instance=gift)
+
+    return render(request, 'edit_gift.html', {'form': form, 'gift': gift})
 
 @login_required
 def other_user_gift_list(request, user_id):
@@ -79,16 +92,20 @@ def delete_selected_gifts(request):
     return redirect('user-gift-list')
 
 @login_required
+def delete_gift(request, pk):
+    gift = get_object_or_404(Gift, pk=pk, user=request.user)
+    gift.delete()
+    return redirect('user-gift-list')
+
+@login_required
 def create_gift(request):
     if request.method == 'POST':
         form = GiftForm(request.POST)
         if form.is_valid():
-            # Create a new gift object
             new_gift = form.save(commit=False)
             new_gift.user = request.user
             new_gift.save()
 
-            # Redirect to the user's gift list page after creating the gift
             return redirect('user-gift-list')
     else:
         form = GiftForm()
@@ -102,7 +119,6 @@ def enter_user_id(request):
     if request.method == 'POST':
         user_id = request.POST.get('user_id')
         try:
-            # Validate if the user with the entered ID exists
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             raise Http404("User does not exist")

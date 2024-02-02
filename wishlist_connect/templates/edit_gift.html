@@ -4,15 +4,7 @@
     <h1>Edit Gift</h1>
     <form method="post" action="{% url 'edit-gift' pk=gift.pk %}">
         {% csrf_token %}
-        <label for="tittle">Tittle:</label>
-        <input type="text" name="title" value="{{ gift.title }}" required>
-        <br>
-        <label for="description">Description:</label>
-        <textarea name="description" required>{{ gift.description }}</textarea>
-        <br>
-        <label for="price">Price:</label>
-        <input type="number" name="price" value="{{ gift.price }}" required>
-        <br>
-        <button type="submit">Save Changes</button>
+        {{ form.as_p }}
+        <button type="submit" class="standard-button">Save Changes</button>
     </form>
 {% endblock %}

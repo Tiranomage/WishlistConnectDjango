@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Main Menu</h1>
-    <!-- Your main menu design goes here -->
-    <a href="{% url 'user-gift-list' %}">View Your Gift List</a>
-    <a href="{% url 'enter-user-id' %}">Enter User ID</a>
+    <div style="text-align: center;">
+        <a href="{% url 'user-gift-list' %}" class="menu-button">View Your Gift List</a>
+        <a href="{% url 'enter-user-id' %}" class="menu-button">Enter User ID</a>
+    </div>
 {% endblock %}
+

@@ -152,7 +152,7 @@ ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = False
 # Include allauth URLs
 LOGIN_URL = 'account_login'
 LOGOUT_URL = 'account_logout'
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'main-menu'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

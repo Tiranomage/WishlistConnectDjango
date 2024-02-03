@@ -1,14 +1,37 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Your Gift List</h1>
-    <a href="{% url 'create-gift' %}" class="standard-button">Create a New Gift</a>
+    <div class="text-center">
+        <h1>Your Gift List</h1>
+    </div>  
+
+    <div class="mb-4 text-center">
+        <a href="{% url 'create-gift' %}" class="standard-button">Create New Gift</a>
+    </div>
+
+    <form method="get" class="mb-4 text_center">
+        <label for="sort_by" calss="mr-2">Sort by:</label>
+        <select name="sort_by" id="sort_by" class="mr-2">
+            {% for key, label in sort_options.items %}
+                <option value="{{ key }}" {% if key == sort_by %}selected{% endif %}> {{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="order" class="mr-s">Order:</label>
+        <select name="order" id="order" class="mr-2">
+            <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+            <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+        </select>
+
+        <button type="submit" class="standard-button">Apply</button>
+    </form>
 
     {% for gift in gifts %}
-        <div>
-            <p>Name: {{ gift.title }}</p>
+        <div class="mb-4">
+            <p>Title: {{ gift.title }}</p>
             <p>Description: {{ gift.description }}</p>
             <p>Price: {{ gift.price }}</p>
+            <p>Priority: {{ gift.get_priority_display }}</p>
             <form method="post" action="{% url 'delete-gift' pk=gift.pk %}" style="display: inline;">
                 {% csrf_token %}
                 <button type="submit" class="delete-button">Delete</button>

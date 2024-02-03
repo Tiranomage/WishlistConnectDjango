@@ -1,9 +1,31 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Gifts from User {{ other_user.username }}</h1>
+    <div class="text-center">
+        {% if other_user %}
+            <h2>Gift List for {{ other_user.username }}</h2>
+        {% endif %}
+    </div> 
+
+    <form method="get" class="mb-4">
+        <label for="sort_by">Sort by:</label>
+        <select name="sort_by" id="sort_by" class="mr-2">
+            {% for key, label in sort_options.items %}
+                <option value="{{ key }}" {% if key == sort_by %}selected{% endif %}> {{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="order">Order:</label>
+        <select name="order" id="order" class="mr-2">
+            <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+            <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+        </select>
+
+        <button type="submit" class="standard-button">Apply</button>
+    </form>
+
     {% for gift in gifts %}
-        <div>
+        <div class="mb-3">
             <p>Name: {{ gift.title }}</p>
             <p>Description: {{ gift.description }}</p>
             <p>Price: {{ gift.price }}</p>

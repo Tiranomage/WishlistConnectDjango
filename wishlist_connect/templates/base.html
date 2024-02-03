@@ -3,51 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Wish List Connect{% endblock %}</title>
+    <title>{% block title %}Wishlist Connect{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
         body {
-            background-color: white;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        .top-menu {
-            background: linear-gradient(to right, #3498db, #2980b9);
-            padding: 10px;
-            text-align: center;
-        }
-        .menu-button, .standard-button {
-            background-color: #3498db;
-            color: white;
-            padding: 10px 20px;
+            background-color: #f8f9fa;
             margin: 20px;
-            text-decoration: none;
-            display: inline-block;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        h1, h2, h3 {
+            color: #007bff;
+        }
+        .navbar {
+            background-color: #007bff;
+        }
+        .navbar a {
+            color: #007bff;
+            margin-right: 10px;
+        }
+        .navbar a:hover {
+            color: #0056b3;
+        }
+        .navbar-toggler-icon {
+            background-color: #fff;
+        }
+        .standard-button {
+            background-color: #007bff;
+            color: #fff;
             border: none;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
+        }
+        .standard-button:hover {
+            background-color: #0056b3;
+            color: #fff;
         }
         .delete-button {
-            background-color: #e74c3c; /* Red color */
-            color: white;
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
             padding: 10px 20px;
             margin: 20px;
-            text-decoration: none;
-            display: inline-block;
-            border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-        .content {
-            margin: 20px;
+        .delete-button:hover {
+            background-color: #c63b2b;
+            color: #fff;
+        }
+        hr {
+            border-top: 1px solid #dee2e6;
         }
     </style>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
 </head>
 <body>
-    <div class="top-menu">
-        <a href="{% url 'user-gift-list' %}" class="menu-button">View Your Gift List</a>
-        <a href="{% url 'enter-user-id' %}" class="menu-button">Enter User ID</a>
-    </div>
-    <div class="content">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="{% url 'main-menu' %}">Wishlist Connect</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'user-gift-list' %}">Your Gifts</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'enter-user-id' %}">Other User's Gifts</a>
+                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'user-profile' %}">Your profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}?next={% url 'login' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer;">Logout</button>
+                        </form>
+                    </li>
+        {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
         {% block content %}{% endblock %}
     </div>
 </body>

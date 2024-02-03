@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions
-from .models import Gift
-from .forms import GiftForm
+from .models import Gift, UserProfile
+from .forms import GiftForm, UserProfileForm
 from .serializers import GiftSerializer
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.models import User
@@ -58,7 +58,27 @@ def main_menu(request):
 @login_required
 def user_gift_list(request):
     gifts = Gift.objects.filter(user=request.user)
-    return render(request, 'user_gift_list.html', {'gifts': gifts})
+    sort_options = {
+        'priority': 'Priority',
+        'title': 'Alphabetical',
+        'price': 'Price',
+    }
+
+    sort_by = request.GET.get('sort_by', 'priority')
+    order = request.GET.get('order', 'asc')
+
+    if order == 'desc':
+        gifts = Gift.objects.filter(user=request.user).order_by(f'-{sort_by}')
+    else:
+        gifts = Gift.objects.filter(user=request.user).order_by(sort_by)
+
+    context = {
+        'gifts': gifts,
+        'sort_by': sort_by,
+        'order': order,
+        'sort_options': sort_options,
+    }
+    return render(request, 'user_gift_list.html', context)
 
 @login_required
 def edit_gift(request, pk):
@@ -77,8 +97,36 @@ def edit_gift(request, pk):
 @login_required
 def other_user_gift_list(request, user_id):
     other_user = get_object_or_404(User, id=user_id)
+    other_user_profile = get_object_or_404(UserProfile, user=other_user)
     gifts = Gift.objects.filter(user=other_user)
-    return render(request, 'other_user_gift_list.html', {'gifts': gifts, 'other_user': other_user})
+
+    if not other_user_profile.visible:
+        return render(request, 'invisible_user_notification.html', {'other_user': other_user})
+
+    sort_options = {
+        'priority': 'Priority',
+        'title': 'Alphabetical',
+        'price': 'Price',
+    }
+
+    other_user = get_object_or_404(User, id=user_id)
+    sort_by = request.GET.get('sort_by', 'priority')
+    order = request.GET.get('order', 'asc')
+
+    if order == 'desc':
+        gifts = Gift.objects.filter(user=other_user).order_by(f'-{sort_by}')
+    else:
+        gifts = Gift.objects.filter(user=other_user).order_by(sort_by)
+
+    context = {
+        'gifts': gifts,
+        'sort_by': sort_by,
+        'order': order,
+        'sort_options': sort_options,
+        'other_user': other_user,
+    }
+
+    return render(request, 'other_user_gift_list.html', context)
 
 def view_gift(request, pk):
     gift = get_object_or_404(Gift, pk=pk)
@@ -127,3 +175,16 @@ def enter_user_id(request):
 
     return render(request, 'enter_user_id.html')
 
+@login_required
+def user_profile(request):
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('main-menu')
+    else:
+        form = UserProfileForm(instance=profile)
+
+    return render(request, 'user_profile.html', {'form': form})

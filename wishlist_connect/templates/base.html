@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% load i18n %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,6 +11,8 @@
         body {
             background-color: #f8f9fa;
             margin: 20px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
         }
         .container {
             background-color: #fff;
@@ -77,19 +81,19 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'user-gift-list' %}">Your Gifts</a>
+                    <a class="nav-link" href="{% url 'user-gift-list' %}">{%trans "Your Gifts"%}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'enter-user-id' %}">Other User's Gifts</a>
+                    <a class="nav-link" href="{% url 'enter-user-id' %}">{% trans "Other User's Gifts"%}</a>
                 </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'user-profile' %}">Your profile</a>
+                        <a class="nav-link" href="{% url 'user-profile' %}">{% trans "Your profile"%}</a>
                     </li>
                     <li class="nav-item">
                         <form method="post" action="{% url 'logout' %}?next={% url 'login' %}">
                             {% csrf_token %}
-                            <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer;">Logout</button>
+                            <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer;">{% trans "Logout"%}</button>
                         </form>
                     </li>
         {% endif %}

@@ -1,12 +1,32 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
-    <h1>Enter User ID</h1>
+    <h1>{% trans "Enter User ID"%}</h1>
     <form method="post" action="{% url 'enter-user-id' %}">
         {% csrf_token %}
-        <label for="user_id">User ID:</label>
+        <label for="user_id">{% trans "User ID:"%}</label>
         <input type="number" name="user_id" required>
         <br>
-        <button type="submit" class="standard-button">View User's Gift List</button>
+        <button type="submit" class="standard-button">{% trans "View User's Gift List"%}</button>
     </form>
+
+    <script>
+        function fetchUserGifts(userId) {
+            $.ajax({
+                url: '{% url "other-user-gift-list" user_id=0 %}'.replace('0', userId),
+                method: 'GET',
+                success: function (data) {
+                    if (data.error) {
+                        alert(data.error);
+                    }
+                },
+                error: function () {
+                    alert('An error occurred while fetching user gifts.');
+                }
+            });
+        }
+
+        fetchUserGifts({{ other_user.id }});
+    </script>
 {% endblock %}

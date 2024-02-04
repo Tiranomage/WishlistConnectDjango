@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
     <div class="text-center">
-        <h1>Welcome to Wishlist Connect</h1>
-        <p>This is my project, written in Django, created for sharing wishlists with friends.</p>
-        <p>Feel free to explore and manage your wishlists!</p>
+        <h1>{% trans "Welcome to Wishlist Connect"%}</h1>
+        <p>{% trans "This is my project, written in Django, created for sharing wishlists with friends."%}</p>
+        <p>{% trans "Feel free to explore and manage your wishlists!"%}</p>
     </div>
 
     <div class="text-center mt-4">
-        <a href="{% url 'user-gift-list' %}" class="standard-button">View Your Gift List</a>
-        <a href="{% url 'enter-user-id' %}" class="standard-button">Enter User ID</a>
-        <a href="{% url 'user-profile' %}" class="standard-button">User Profile</a>
+        <a href="{% url 'user-gift-list' %}" class="standard-button">{% trans "View Your Gift List"%}</a>
+        <a href="{% url 'enter-user-id' %}" class="standard-button">{% trans "Enter User ID"%}</a>
+        <a href="{% url 'user-profile' %}" class="standard-button">{% trans "User Profile"%}</a>
     </div>
 {% endblock %}
 

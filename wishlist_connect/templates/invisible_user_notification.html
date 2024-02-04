@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
-    <h2>User's Wishlist is Hidden</h2>
-    <p>{{ other_user.username }} has chosen to hide their wishlist.</p>
+    <h2>{% trans "User's Wishlist is Hidden"%}</h2>
+    <p>{% trans "User has chosen to hide their wishlist."%}</p>
 {% endblock %}

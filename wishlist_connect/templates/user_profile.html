@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
-    <h2>User Profile</h2>
+    <h2>{% trans "User Profile"%}</h2>
     <form method="post" action="{% url 'user-profile' %}">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="standard-button">Save Changes</button>
+        <button type="submit" class="standard-button">{% trans "Save Changes"%}</button>
     </form>
 {% endblock %}

@@ -1,35 +1,58 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
     <div class="text-center">
         {% if other_user %}
-            <h2>Gift List for {{ other_user.username }}</h2>
+            <h2>{% trans "Gift List for"%} {{ other_user.username }}</h2>
         {% endif %}
     </div> 
 
     <form method="get" class="mb-4">
-        <label for="sort_by">Sort by:</label>
+        <label for="sort_by">{% trans "Sort by:"%}</label>
         <select name="sort_by" id="sort_by" class="mr-2">
             {% for key, label in sort_options.items %}
                 <option value="{{ key }}" {% if key == sort_by %}selected{% endif %}> {{ label }}</option>
             {% endfor %}
         </select>
 
-        <label for="order">Order:</label>
+        <label for="order">{% trans "Order:"%}</label>
         <select name="order" id="order" class="mr-2">
-            <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
-            <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+            <option value="asc" {% if order == 'asc' %}selected{% endif %}>{% trans "Ascending"%}</option>
+            <option value="desc" {% if order == 'desc' %}selected{% endif %}>{% trans "Descending"%}</option>
         </select>
 
-        <button type="submit" class="standard-button">Apply</button>
+        <button type="submit" class="standard-button">{% trans "Apply"%}</button>
     </form>
 
     {% for gift in gifts %}
-        <div class="mb-3">
-            <p>Name: {{ gift.title }}</p>
-            <p>Description: {{ gift.description }}</p>
-            <p>Price: {{ gift.price }}</p>
+        <div class="mb-4">
+            <p>{% trans "Name:"%} {{ gift.title }}</p>
+            <p>{% trans "Description:"%} {{ gift.description }}</p>
+            <p>{% trans "Price:"%} {{ gift.price }}</p>
+            <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
         </div>
         <hr>
     {% endfor %}
+
+    <script>
+        function fetchUserGifts(userId) {
+            $.ajax({
+                url: '{% url "enter-user-id" %}',
+                method: 'POST',
+                data: {'user_id': userId, csrfmiddlewaretoken: '{{ csrf_token }}'},
+                success: function (data) {
+                    if (data.error) {
+                        alert(data.error);
+                    }
+                },
+                error: function () {
+                    alert('An error occurred while fetching user gifts.');
+                }
+            });
+        }
+
+        fetchUserGifts({{ other_user.id }});
+    </script>
+
 {% endblock %}

@@ -1,42 +1,43 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
     <div class="text-center">
-        <h1>Your Gift List</h1>
+        <h1>{% trans "Your Gift List"%}</h1>
     </div>  
 
     <div class="mb-4 text-center">
-        <a href="{% url 'create-gift' %}" class="standard-button">Create New Gift</a>
+        <a href="{% url 'create-gift' %}" class="standard-button">{% trans "Create New Gift"%}</a>
     </div>
 
     <form method="get" class="mb-4 text_center">
-        <label for="sort_by" calss="mr-2">Sort by:</label>
+        <label for="sort_by" calss="mr-2">{% trans "Sort by:"%}</label>
         <select name="sort_by" id="sort_by" class="mr-2">
             {% for key, label in sort_options.items %}
                 <option value="{{ key }}" {% if key == sort_by %}selected{% endif %}> {{ label }}</option>
             {% endfor %}
         </select>
 
-        <label for="order" class="mr-s">Order:</label>
+        <label for="order" class="mr-s">{% trans "Order:"%}</label>
         <select name="order" id="order" class="mr-2">
-            <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
-            <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+            <option value="asc" {% if order == 'asc' %}selected{% endif %}>{% trans "Ascending"%}</option>
+            <option value="desc" {% if order == 'desc' %}selected{% endif %}>{% trans "Descending"%}</option>
         </select>
 
-        <button type="submit" class="standard-button">Apply</button>
+        <button type="submit" class="standard-button">{% trans "Apply"%}</button>
     </form>
 
     {% for gift in gifts %}
         <div class="mb-4">
-            <p>Title: {{ gift.title }}</p>
-            <p>Description: {{ gift.description }}</p>
-            <p>Price: {{ gift.price }}</p>
-            <p>Priority: {{ gift.get_priority_display }}</p>
+            <p>{% trans "Title:"%} {{ gift.title }}</p>
+            <p>{% trans "Description:"%} {{ gift.description }}</p>
+            <p>{% trans "Price:"%} {{ gift.price }}</p>
+            <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
             <form method="post" action="{% url 'delete-gift' pk=gift.pk %}" style="display: inline;">
                 {% csrf_token %}
-                <button type="submit" class="delete-button">Delete</button>
+                <button type="submit" class="delete-button">{% trans "Delete"%}</button>
             </form>
-            <a href="{% url 'edit-gift' pk=gift.pk %}" class="standard-button">Edit</a>
+            <a href="{% url 'edit-gift' pk=gift.pk %}" class="standard-button">{% trans "Edit"%}</a>
         </div>
         <hr>
     {% endfor %}

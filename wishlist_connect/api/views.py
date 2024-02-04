@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
@@ -96,8 +96,16 @@ def edit_gift(request, pk):
 
 @login_required
 def other_user_gift_list(request, user_id):
-    other_user = get_object_or_404(User, id=user_id)
-    other_user_profile = get_object_or_404(UserProfile, user=other_user)
+    try:
+        other_user = get_object_or_404(User, id=user_id)
+        other_user_profile = get_object_or_404(UserProfile, user=other_user)
+
+    except User.DoesNotExist:
+        if request.is_ajax():
+            return JsonResponse({'error': 'User not found'}, status=404)
+        else:
+            return render(request, 'user_not_found_notification.html')
+
     gifts = Gift.objects.filter(user=other_user)
 
     if not other_user_profile.visible:
@@ -163,15 +171,25 @@ def create_gift(request):
 def home(request):
     return render(request, 'home.html')
 
+@login_required
 def enter_user_id(request):
     if request.method == 'POST':
-        user_id = request.POST.get('user_id')
+        user_id = request.POST.get('user_id', None)
         try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            raise Http404("User does not exist")
+            user_id = int(user_id) 
+            other_user = get_object_or_404(User, pk=user_id)
+            other_user_profile = UserProfile.objects.filter(user=other_user).first()
 
-        return redirect('other-user-gift-list', user_id=user_id)
+            if other_user_profile and not other_user_profile.visible:
+                return render(request, 'invisible_user_notification.html', {'other_user': other_user})
+
+            gifts = Gift.objects.filter(user=other_user)
+            return render(request, 'other_user_gift_list.html', {'other_user': other_user, 'gifts': gifts})
+        except (ValueError, User.DoesNotExist, UserProfile.DoesNotExist):
+            if request.is_ajax():
+                return JsonResponse({'error': _('User not found')}, status=404)
+            else:
+                return render(request, 'user_not_found_notification.html')
 
     return render(request, 'enter_user_id.html')
 

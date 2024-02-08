@@ -7,4 +7,7 @@
     <p>{% trans "Description:"%} {{ gift.description }}</p>
     <p>{% trans "Price:"%} {{ gift.price }}</p>
     <p>{% trans "Priority:"%} {{gift.priority}}</p>
+    {% if gift.image %}
+        <img src="{{ gift.image.url }}" alt="{{ gift.name }} Image">
+    {% endif %}
 {% endblock %}

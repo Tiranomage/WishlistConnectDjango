@@ -3,7 +3,7 @@
 
 {% block content %}
     <h1>{% trans "Edit Gift"%}</h1>
-    <form method="post" action="{% url 'edit-gift' pk=gift.pk %}">
+    <form method="post" action="{% url 'edit-gift' pk=gift.pk %}" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="standard-button">{% trans "Save Changes"%}</button>

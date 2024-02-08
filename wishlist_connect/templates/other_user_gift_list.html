@@ -25,15 +25,54 @@
         <button type="submit" class="standard-button">{% trans "Apply"%}</button>
     </form>
 
-    {% for gift in gifts %}
-        <div class="mb-4">
-            <p>{% trans "Name:"%} {{ gift.title }}</p>
-            <p>{% trans "Description:"%} {{ gift.description }}</p>
-            <p>{% trans "Price:"%} {{ gift.price }}</p>
-            <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
-        </div>
-        <hr>
-    {% endfor %}
+    <form method="get" action="{% url 'other-user-gift-list' user_id=other_user.id %}" class="mb-4">
+        {% csrf_token %}
+        <label for="search_query" class="mr-2">{% trans "Search by Gift Name:" %}</label>
+        <input type="text" name="search_query" id="search_query" value="{{ search_query }}">
+        <button type="submit" class="standard-button" data-ajax="{% if request.is_ajax %}true{% else %}false{% endif %}">
+            {% trans "Search" %}
+        </button>
+    </form>
+
+    {% if search_query %}
+        {% if gifts%}
+            <ul>
+                {% for gift in gifts %}
+                    <div class="mb-4">
+                        <p>{% trans "Title:"%} {{ gift.title }}</p>
+                        <p>{% trans "Description:"%} {{ gift.description }}</p>
+                        <p>{% trans "Price:"%} {{ gift.price }}</p>
+                        <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
+                        {% if gift.image %}
+                            <img src="{{ gift.image.url }}" alt="{{ gift.name }} Image">
+                        {% endif %}
+                    </div>
+                    <hr>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>{% trans "No gifts found." %}</p>
+        {% endif %}
+    {% else%}
+        {% if gifts%}
+            <ul>
+                {% for gift in gifts %}
+                    <div class="mb-4">
+                        <p>{% trans "Title:"%} {{ gift.title }}</p>
+                        <p>{% trans "Description:"%} {{ gift.description }}</p>
+                        <p>{% trans "Price:"%} {{ gift.price }}</p>
+                        <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
+                        {% if gift.image %}
+                            <img src="{{ gift.image.url }}" alt="{{ gift.name }} Image">
+                        {% endif %}
+                    </div>
+                    <hr>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>{% trans "Current user hasn't gifts." %}</p>
+        {% endif %}
+    {% endif %}
 
     <script>
         function fetchUserGifts(userId) {

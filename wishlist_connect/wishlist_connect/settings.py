@@ -77,6 +77,9 @@ TEMPLATES = [
     },
 ]
 
+MEDIA_URL = ''
+MEDIA_ROOT = BASE_DIR / 'gift_images'
+
 WSGI_APPLICATION = 'wishlist_connect.wsgi.application'
 
 

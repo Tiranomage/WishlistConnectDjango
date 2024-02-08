@@ -1,9 +1,9 @@
-{% load i18n %}
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
     <h1>{% trans 'Create a New Gift'%}</h1>
-    <form method="post" action="{% url 'create-gift' %}">
+    <form method="post" action="{% url 'create-gift' %}" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">{% trans "Create Gift"%}</button>

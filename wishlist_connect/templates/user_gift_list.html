@@ -10,7 +10,7 @@
         <a href="{% url 'create-gift' %}" class="standard-button">{% trans "Create New Gift"%}</a>
     </div>
 
-    <form method="get" class="mb-4 text_center">
+    <form method="get" class="mb-4">
         <label for="sort_by" calss="mr-2">{% trans "Sort by:"%}</label>
         <select name="sort_by" id="sort_by" class="mr-2">
             {% for key, label in sort_options.items %}
@@ -27,18 +27,61 @@
         <button type="submit" class="standard-button">{% trans "Apply"%}</button>
     </form>
 
-    {% for gift in gifts %}
-        <div class="mb-4">
-            <p>{% trans "Title:"%} {{ gift.title }}</p>
-            <p>{% trans "Description:"%} {{ gift.description }}</p>
-            <p>{% trans "Price:"%} {{ gift.price }}</p>
-            <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
-            <form method="post" action="{% url 'delete-gift' pk=gift.pk %}" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="delete-button">{% trans "Delete"%}</button>
-            </form>
-            <a href="{% url 'edit-gift' pk=gift.pk %}" class="standard-button">{% trans "Edit"%}</a>
-        </div>
-        <hr>
-    {% endfor %}
+    <form method="get" action="{% url 'user-gift-list' %}" class="mb-4">
+        {% csrf_token %}
+        <label for="search_query" class="mr-2">{% trans "Search by Gift Name:" %}</label>
+        <input type="text" name="search_query" id="search_query" value="{{ search_query }}">
+        <button type="submit" class="standard-button">{% trans "Search" %}</button>
+    </form>
+
+    {% if search_query %}
+        {% if gifts%}
+            <ul>
+                {% for gift in gifts %}
+                    <div class="mb-4">
+                        <p>{% trans "Title:"%} {{ gift.title }}</p>
+                        <p>{% trans "Description:"%} {{ gift.description }}</p>
+                        <p>{% trans "Price:"%} {{ gift.price }}</p>
+                        <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
+                        {% if gift.image %}
+                            <img src="{{ gift.image.url }}" alt="{{ gift.name }} Image">
+                        {% endif %}
+                        <form method="post" action="{% url 'delete-gift' pk=gift.pk %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-button">{% trans "Delete"%}</button>
+                        </form>
+                        <a href="{% url 'edit-gift' pk=gift.pk %}" class="standard-button" enctype="multipart/form-data">{% trans "Edit"%}</a>
+                    </div>
+                    <hr>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>{% trans "No gifts found." %}</p>
+        {% endif %}
+    {% else%}
+        {% if gifts%}
+            <ul>
+                {% for gift in gifts %}
+                    <div class="mb-4">
+                        <p>{% trans "Title:"%} {{ gift.title }}</p>
+                        <p>{% trans "Description:"%} {{ gift.description }}</p>
+                        <p>{% trans "Price:"%} {{ gift.price }}</p>
+                        <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
+                        {% if gift.image %}
+                            <img src="{{ gift.image.url }}" alt="{{ gift.name }} Image">
+                        {% endif %}
+                        <form method="post" action="{% url 'delete-gift' pk=gift.pk %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-button">{% trans "Delete"%}</button>
+                        </form>
+                        <a href="{% url 'edit-gift' pk=gift.pk %}" class="standard-button" enctype="multipart/form-data">{% trans "Edit"%}</a>
+                    </div>
+                    <hr>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>{% trans "You haven't gifts." %}</p>
+        {% endif %}
+    {% endif %}
+            
 {% endblock %}

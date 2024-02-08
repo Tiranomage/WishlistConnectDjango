@@ -1,4 +1,6 @@
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from .views import (GiftListCreateView, GiftDetailView, 
                     user_gift_list, other_user_gift_list, 
@@ -24,4 +26,4 @@ urlpatterns = [
     path('delete-selected-gifts/', delete_selected_gifts, name='delete-selected-gifts'),
     path('delete-gift/<int:pk>/', delete_gift, name='delete-gift'),
     path('create-gift/', create_gift, name='create-gift'),
-]   
+]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

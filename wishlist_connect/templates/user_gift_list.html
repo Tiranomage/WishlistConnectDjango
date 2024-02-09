@@ -43,9 +43,7 @@
                         <p>{% trans "Description:"%} {{ gift.description }}</p>
                         <p>{% trans "Price:"%} {{ gift.price }}</p>
                         <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
-                        {% if gift.image %}
-                            <img src="{{ gift.image.url }}" alt="{{ gift.name }} Image">
-                        {% endif %}
+                        <p>{% trans "Status:"%} {{ gift.get_status_display }}</p>
                         <form method="post" action="{% url 'delete-gift' pk=gift.pk %}" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="delete-button">{% trans "Delete"%}</button>
@@ -67,9 +65,7 @@
                         <p>{% trans "Description:"%} {{ gift.description }}</p>
                         <p>{% trans "Price:"%} {{ gift.price }}</p>
                         <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
-                        {% if gift.image %}
-                            <img src="{{ gift.image.url }}" alt="{{ gift.name }} Image">
-                        {% endif %}
+                        <p>{% trans "Status:"%} {{ gift.get_status_display }}</p>
                         <form method="post" action="{% url 'delete-gift' pk=gift.pk %}" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="delete-button">{% trans "Delete"%}</button>

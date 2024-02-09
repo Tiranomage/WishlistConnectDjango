@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.http import JsonResponse
+from django.db.models import Func, Q
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
@@ -62,16 +63,17 @@ def user_gift_list(request):
         'priority': 'Priority',
         'title': 'Alphabetical',
         'price': 'Price',
+        'status': 'Status',
     }
 
     sort_by = request.GET.get('sort_by', 'priority')
     order = request.GET.get('order', 'asc')
-    search_query = request.GET.get('search_query', '')
+    search_query = request.GET.get('search_query')
 
     gifts = Gift.objects.filter(user=request.user)
 
     if search_query:
-        gifts = gifts.filter(title__icontains=search_query)
+        gifts = gifts.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
 
     if order == 'desc':
         gifts = gifts.order_by(f'-{sort_by}')
@@ -119,6 +121,7 @@ def other_user_gift_list(request, user_id):
         'priority': 'Priority',
         'title': 'Alphabetical',
         'price': 'Price',
+        'status': 'Status',
     }
 
     sort_by = request.GET.get('sort_by', 'priority')
@@ -128,7 +131,7 @@ def other_user_gift_list(request, user_id):
 
     search_query = request.GET.get('search_query', '')
     if search_query:
-        gifts = gifts.filter(title__icontains=search_query)
+        gifts = gifts.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
 
     if order == 'desc':
         gifts = gifts.order_by(f'-{sort_by}')

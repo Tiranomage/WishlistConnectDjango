@@ -16,6 +16,15 @@ class Gift(models.Model):
         ('not given', 'Not given'),
         ('booked', 'Booked'),
     ]
+
+    TYPE_CHOICES = [
+        ('boardgames', 'Board games'),
+        ('books', 'Books'),
+        ('collections', 'Collections'),
+        ('computergames', 'Computer games'),
+        ('home', 'Home'),
+        ('other', 'Other'),
+    ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
@@ -23,6 +32,7 @@ class Gift(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='none')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='not given')
+    types = models.CharField(max_length=15, choices=TYPE_CHOICES, default='other')
     image = models.ImageField(upload_to='gift_images/', blank=True, null=True)
 
 

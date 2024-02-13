@@ -64,6 +64,7 @@ def user_gift_list(request):
         'title': 'Alphabetical',
         'price': 'Price',
         'status': 'Status',
+        'types' : 'Types',
     }
 
     sort_by = request.GET.get('sort_by', 'priority')
@@ -122,6 +123,7 @@ def other_user_gift_list(request, user_id):
         'title': 'Alphabetical',
         'price': 'Price',
         'status': 'Status',
+        'types' : 'Types',
     }
 
     sort_by = request.GET.get('sort_by', 'priority')

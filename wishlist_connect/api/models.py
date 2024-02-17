@@ -50,6 +50,19 @@ class Wishlist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     gifts = models.ManyToManyField(Gift)
 
+class GiftType(models.Model):
+    name = models.CharField(max_length=15)
+
+class GiftStatus(models.Model):
+    name = models.CharField(max_length=10)
+
+class GiftPriority(models.Model):
+    name = models.CharField(max_length=10)
+
+class GiftPrice(models.Model):
+    min_price = models.DecimalField(max_digits=10, decimal_places=2)
+    max_price = models.DecimalField(max_digits=10, decimal_places=2)
+
 @receiver(post_save, sender=User)
 def create_wishlist(sender, instance, created, **kwargs):
     if created:

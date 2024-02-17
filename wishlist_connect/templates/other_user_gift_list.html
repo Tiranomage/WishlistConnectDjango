@@ -29,46 +29,28 @@
         {% csrf_token %}
         <label for="search_query" class="mr-2">{% trans "Search by Gift Name:" %}</label>
         <input type="text" name="search_query" id="search_query" value="{{ search_query }}">
-        <button type="submit" class="standard-button" data-ajax="{% if request.is_ajax %}true{% else %}false{% endif %}">
-            {% trans "Search" %}
-        </button>
+        <button type="submit" class="standard-button">{% trans "Search" %}</button>
     </form>
 
-    {% if search_query %}
-        {% if gifts%}
-            <ul>
-                {% for gift in gifts %}
-                    <div class="mb-4">
-                        <p>{% trans "Title:"%} {{ gift.title }}</p>
-                        <p>{% trans "Description:"%} {{ gift.description }}</p>
-                        <p>{% trans "Price:"%} {{ gift.price }}</p>
-                        <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
-                        <p>{% trans "Status:"%} {{ gift.get_status_display }}</p>
-                    </div>
-                    <hr>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>{% trans "No gifts found." %}</p>
-        {% endif %}
-    {% else%}
-        {% if gifts%}
-            <ul>
-                {% for gift in gifts %}
-                    <div class="mb-4">
-                        <p>{% trans "Title:"%} {{ gift.title }}</p>
-                        <p>{% trans "Description:"%} {{ gift.description }}</p>
-                        <p>{% trans "Price:"%} {{ gift.price }}</p>
-                        <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
-                        <p>{% trans "Status:"%} {{ gift.get_status_display }}</p>
-                    </div>
-                    <hr>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>{% trans "Current user hasn't gifts." %}</p>
-        {% endif %}
-    {% endif %}
+    <button type="button" class="filter-button" data-toggle="modal" data-target="#filterModal">{% trans "Filter"%}</button>
+
+    <div id="filterParamsContainer" class="mb-3">
+        <p id="filterParamsText"></p>
+    </div>
+
+    <div id="giftListContainer">
+        {% for gift in gifts %}
+            <div class="mb-4">
+                <p>{% trans "Title:"%} {{ gift.title }}</p>
+                <p>{% trans "Description:"%} {{ gift.description }}</p>
+                <p>{% trans "Price:"%} {{ gift.price }}</p>
+                <p>{% trans "Priority:"%} {{ gift.get_priority_display }}</p>
+                <p>{% trans "Types:"%} {{ gift.get_types_display }}</p>
+                <p>{% trans "Status:"%} {{ gift.get_status_display }}</p>
+            </div>
+            <hr>
+        {% endfor %}
+    </div>
 
     <script>
         function fetchUserGifts(userId) {
@@ -88,6 +70,121 @@
         }
 
         fetchUserGifts({{ other_user.id }});
+
+        function applyFilter() {
+            var formData = new FormData(document.getElementById('filterForm'));
+            fetch('{% url "user-gift-list" %}', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateGiftList(data.gifts);
+                displayFilterParameters(formData);
+                $('#filterModal').modal('hide');
+            });
+        }
+        
+        function displayFilterParameters() {
+            var filterParamsContainer = document.getElementById('filterParamsContainer');
+            filterParamsContainer.innerHTML = '';
+        
+            var filterParams = document.createElement('p');
+            filterParams.textContent = `{% trans "Filter Parameters:" %} ${getFilterParameters()}`;
+            filterParamsContainer.appendChild(filterParams);
+
+            var clearFiltersButton = document.createElement('button');
+            clearFiltersButton.textContent = '{% trans "Clear Filters" %}';
+            clearFiltersButton.classList.add('btn', 'btn-danger', 'ml-2');
+            clearFiltersButton.addEventListener('click', clearFilters);
+            filterParamsContainer.appendChild(clearFiltersButton);
+        }
+
+        function clearFilters() {
+            document.getElementById('filterForm').reset();
+
+            fetch('{% url "clear-filters" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateGiftList(data.gifts);
+                displayFilterParameters();
+                $('#filterModal').modal('hide');
+            });
+        }
+        
+        function getFilterParameters(formData) {
+            var params = [];
+
+            var priceMin = formData.get('price_min');
+            var priceMax = formData.get('price_max');
+            var priority = formData.get('priority');
+            var status = formData.get('status');
+            var types = formData.get('types');
+        
+            if (priceMin) params.push(`{% trans "Min Price:" %} ${priceMin}`);
+            if (priceMax) params.push(`{% trans "Max Price:" %} ${priceMax}`);
+            if (priority) params.push(`{% trans "Priority:" %} ${getPriorityText(priority)}`);
+            if (status) params.push(`{% trans "Status:" %} ${getStatusText(status)}`);
+            if (types) params.push(`{% trans "Types:" %} ${getTypeText(types)}`);
+        
+            return params.join(', ');
+        }
+        
+    
+        function updateGiftList(gifts) {
+            var giftListContainer = document.getElementById('giftListContainer');
+            giftListContainer.innerHTML = '';
+        
+            if (gifts.length > 0) {
+                var ul = document.createElement('ul');
+                gifts.forEach(function(gift) {
+                    var li = document.createElement('li');
+                    li.textContent = `${gift.title} - ${gift.description} - ${gift.price} - ${gift.types} - ${gift.status} - ${gift.priority}`;
+                    ul.appendChild(li);
+                });
+                giftListContainer.appendChild(ul);
+            } else {
+                var p = document.createElement('p');
+                p.textContent = '{% trans "No gifts found." %}';
+                giftListContainer.appendChild(p);
+            }
+        }
+    
+        function getPriorityText(priority) {
+            switch (priority) {
+                case 'high': return '{% trans "High" %}';
+                case 'medium': return '{% trans "Medium" %}';
+                case 'low': return '{% trans "Low" %}';
+                case 'none': return '{% trans "None" %}';
+                default: return '';
+            }
+        }
+    
+        function getStatusText(status) {
+            switch (status) {
+                case 'given': return '{% trans "Given" %}';
+                case 'not given': return '{% trans "Not given" %}';
+                case 'booked': return '{% trans "Booked" %}';
+                default: return '';
+            }
+        }
+    
+        function getTypeText(types) {
+            switch (types) {
+                case 'boardgames': return '{% trans "Board games" %}';
+                case 'books': return '{% trans "Books" %}';
+                case 'collections': return '{% trans "Collections" %}';
+                case 'computergames': return '{% trans "Computer games" %}';
+                case 'home': return '{% trans "Home" %}';
+                case 'other': return '{% trans "Other" %}';
+                default: return '';
+            }
+        }
     </script>
 
 {% endblock %}

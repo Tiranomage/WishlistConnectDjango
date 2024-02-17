@@ -1,8 +1,8 @@
 from rest_framework import generics, permissions
 from .models import Gift, UserProfile
-from .forms import GiftForm, UserProfileForm
+from .forms import GiftForm, UserProfileForm, GiftFilterForm
 from .serializers import GiftSerializer
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, render, redirect, HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.db.models import Func, Q
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
+import json
 
 class GiftListCreateView(generics.ListCreateAPIView):
     queryset = Gift.objects.all()
@@ -56,39 +57,40 @@ def other_user_gift_list(request, user_id):
 def main_menu(request):
     return render(request, 'main_menu.html')
 
-@login_required
-def user_gift_list(request):
-    gifts = Gift.objects.filter(user=request.user)
-    sort_options = {
-        'priority': 'Priority',
-        'title': 'Alphabetical',
-        'price': 'Price',
-        'status': 'Status',
-        'types' : 'Types',
-    }
+def apply_filter_logic(user, filter_params):
+    gifts = Gift.objects.filter(user=user)
 
-    sort_by = request.GET.get('sort_by', 'priority')
-    order = request.GET.get('order', 'asc')
-    search_query = request.GET.get('search_query')
+    price_min = filter_params.get('price_min')
+    price_max = filter_params.get('price_max')
+    priority = filter_params.get('priority')
+    status = filter_params.get('status')
+    types = filter_params.get('types')
 
-    gifts = Gift.objects.filter(user=request.user)
+    if price_min:
+        gifts = gifts.filter(price__gte=price_min)
 
-    if search_query:
-        gifts = gifts.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
+    if price_max:
+        gifts = gifts.filter(price__lte=price_max)
 
-    if order == 'desc':
-        gifts = gifts.order_by(f'-{sort_by}')
-    else:
-        gifts = gifts.order_by(sort_by)
+    if priority:
+        gifts = gifts.filter(priority=priority)
 
-    context = {
-        'gifts': gifts,
-        'sort_by': sort_by,
-        'order': order,
-        'sort_options': sort_options,
-        'search_query': search_query,
-    }
-    return render(request, 'user_gift_list.html', context)
+    if status:
+        gifts = gifts.filter(status=status)
+
+    if types:
+        gifts = gifts.filter(types=types)
+
+    return gifts
+
+def process_filter_request(request, filter_params):
+    filter_params['price_min'] = request.POST.get('price_min')
+    filter_params['price_max'] = request.POST.get('price_max')
+    filter_params['priority'] = request.POST.get('priority')
+    filter_params['status'] = request.POST.get('status')
+    filter_params['types'] = request.POST.get('types')
+
+    return filter_params
 
 @login_required
 def edit_gift(request, pk):
@@ -103,6 +105,48 @@ def edit_gift(request, pk):
         form = GiftForm(instance=gift)
 
     return render(request, 'edit_gift.html', {'form': form, 'gift': gift})
+
+@login_required
+def user_gift_list(request):
+    gifts = Gift.objects.filter(user=request.user)
+    sort_options = {
+        'priority': 'Priority',
+        'title': 'Alphabetical',
+        'price': 'Price',
+        'status': 'Status',
+        'types' : 'Types',
+    }
+
+    filter_params = request.session.get('filter_params', {})
+    
+    if request.method == 'POST':
+        filter_params = process_filter_request(request, filter_params)
+
+    gifts = apply_filter_logic(request.user, filter_params)
+
+    sort_by = request.GET.get('sort_by', 'priority')
+    order = request.GET.get('order', 'asc')
+    search_query = request.GET.get('search_query')
+
+    if search_query:
+        gifts = gifts.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
+
+    if order == 'desc':
+        gifts = gifts.order_by(f'-{sort_by}')
+    else:
+        gifts = gifts.order_by(sort_by)
+
+    request.session['filter_params'] = filter_params
+
+    context = {
+        'gifts': gifts,
+        'sort_by': sort_by,
+        'order': order,
+        'sort_options': sort_options,
+        'search_query': search_query,
+    }
+
+    return render(request, 'user_gift_list.html', context)
 
 @login_required
 def other_user_gift_list(request, user_id):
@@ -126,12 +170,17 @@ def other_user_gift_list(request, user_id):
         'types' : 'Types',
     }
 
+    filter_params = request.session.get('filter_params', {})
+    
+    if request.method == 'POST':
+        filter_params = process_filter_request(request, filter_params)
+
+    gifts = apply_filter_logic(request.user, filter_params)
+
     sort_by = request.GET.get('sort_by', 'priority')
     order = request.GET.get('order', 'asc')
+    search_query = request.GET.get('search_query')
 
-    gifts = Gift.objects.filter(user=request.user)
-
-    search_query = request.GET.get('search_query', '')
     if search_query:
         gifts = gifts.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
 
@@ -139,6 +188,8 @@ def other_user_gift_list(request, user_id):
         gifts = gifts.order_by(f'-{sort_by}')
     else:
         gifts = gifts.order_by(sort_by)
+
+    request.session['filter_params'] = filter_params
 
     context = {
         'gifts': gifts,
@@ -151,17 +202,6 @@ def other_user_gift_list(request, user_id):
     }
 
     return render(request, 'other_user_gift_list.html', context)
-
-def view_gift(request, pk):
-    gift = get_object_or_404(Gift, pk=pk)
-    return render(request, 'view_gift.html', {'gift': gift})
-
-@login_required
-def delete_selected_gifts(request):
-    if request.method == 'POST':
-        selected_gifts = request.POST.getlist('selected_gifts')
-        Gift.objects.filter(pk__in=selected_gifts, user=request.user).delete()
-    return redirect('user-gift-list')
 
 @login_required
 def delete_gift(request, pk):
@@ -214,3 +254,10 @@ def user_profile(request):
         form = UserProfileForm(instance=profile)
 
     return render(request, 'user_profile.html', {'form': form})
+
+@login_required
+def clear_filters(request):
+    if request.method == 'POST':
+        request.session.pop('filter_params', None)
+
+        return JsonResponse({'gifts': []})
